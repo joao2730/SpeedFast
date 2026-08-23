@@ -10,51 +10,39 @@ public class Main {
 
         System.out.println("==== SISTEMA SPEEDFAST ====");
 
-        // Crear pedido de comida
         PedidoComida comida = new PedidoComida(
                 1,
                 "Av. Los Carrera 123",
-                true
+                5
         );
 
-        // Crear pedido de encomienda
         PedidoEncomienda encomienda = new PedidoEncomienda(
                 2,
                 "Av. Alemania 456",
-                10,
-                true
+                6
         );
 
-        // Crear pedido express
         PedidoExpress express = new PedidoExpress(
                 3,
                 "Av. O'Higgins 789",
-                3.5,
-                true
+                8
         );
 
-        System.out.println("\n--- ASIGNACION SIN NOMBRE ---");
+        System.out.println("\n--- PEDIDO DE COMIDA ---");
+        comida.mostrarResumen();
+        System.out.println("Tiempo estimado: " + comida.calcularTiempoEntrega() + " minutos");
 
-        comida.asignarRepartidor();
+        System.out.println("\n--- PEDIDO DE ENCOMIENDA ---");
+        encomienda.mostrarResumen();
+        System.out.println("Tiempo estimado: " + encomienda.calcularTiempoEntrega() + " minutos");
 
-        System.out.println();
+        System.out.println("\n--- PEDIDO DE EXPRESS ---");
+        express.mostrarResumen();
+        System.out.println("Tiempo estimado: " + express.calcularTiempoEntrega() + " minutos");
 
-        encomienda.asignarRepartidor();
-
-        System.out.println();
-
-        express.asignarRepartidor();
-
-        System.out.println("\n--- ASIGNACION CON NOMBRE ---");
-
-        comida.asignarRepartidor("Juan Pérez");
-
-        System.out.println();
-
-        encomienda.asignarRepartidor("Camila Soto");
-
-        System.out.println();
-
-        express.asignarRepartidor("Luis Díaz");
+        System.out.println("\n==== COMPARACIÓN DE TIEMPOS ====");
+        System.out.println("Comida: " + comida.calcularTiempoEntrega() + " minutos");
+        System.out.println("Encomienda: " + encomienda.calcularTiempoEntrega() + " minutos");
+        System.out.println("Express: " + express.calcularTiempoEntrega() + " minutos");
     }
 }

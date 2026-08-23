@@ -1,15 +1,15 @@
 package model;
 
-public class Pedido {
+public abstract class Pedido {
 
     private int idPedido;
     private String direccionEntrega;
-    private String tipoPedido;
+    private double distanciaKm;
 
-    public Pedido(int idPedido, String direccionEntrega, String tipoPedido) {
+    public Pedido(int idPedido, String direccionEntrega, double distanciaKm) {
         this.idPedido = idPedido;
         this.direccionEntrega = direccionEntrega;
-        this.tipoPedido = tipoPedido;
+        this.distanciaKm = distanciaKm;
     }
 
     public int getIdPedido() {
@@ -28,21 +28,21 @@ public class Pedido {
         this.direccionEntrega = direccionEntrega;
     }
 
-    public String getTipoPedido() {
-        return tipoPedido;
+    public double getDistanciaKm() {
+        return distanciaKm;
     }
 
-    public void setTipoPedido(String tipoPedido) {
-        this.tipoPedido = tipoPedido;
+    public void setDistanciaKm(double distanciaKm) {
+        this.distanciaKm = distanciaKm;
     }
 
-    //Método que será sobrescrito por las clases hijas
-    public void asignarRepartidor(){
-        System.out.println("Asignando repartidor...");
+    //Método implementado
+    public void mostrarResumen(){
+        System.out.println("ID del pedido: #" + idPedido);
+        System.out.println("Dirección: " + direccionEntrega);
+        System.out.println("Distancia: " + distanciaKm + " km");
     }
 
-    //Método sobrecargado
-    public void asignarRepartidor(String nombreRepartidor){
-        System.out.println("Pedido asignado a " + nombreRepartidor);
-    }
+    //Método abstracto
+    public abstract int calcularTiempoEntrega();
 }

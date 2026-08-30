@@ -45,4 +45,12 @@ public abstract class Pedido {
 
     //Método abstracto
     public abstract int calcularTiempoEntrega();
+
+    public void asignarRepartidor() {
+        System.out.println("Asignando repartidor automáticamente.");
+    }
+
+    public void asignarRepartidor(String nombre) {
+        System.out.println("Repartidor Asignado: " + nombre);
+    }
 }

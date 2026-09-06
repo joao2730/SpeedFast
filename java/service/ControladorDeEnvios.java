@@ -48,7 +48,7 @@ public class ControladorDeEnvios implements Despachable, Cancelable, Rastreable 
 
         for (Pedido pedido : pedidos) {
             System.out.println("Pedido #" + pedido.getIdPedido() + " despachando.");
-            historial.add("Pedido #" + pedido.getIdPedido() + " despachando.");
+            historial.add("Pedido #" + pedido.getIdPedido() + " despachado.");
         }
 
     }

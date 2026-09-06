@@ -1,88 +1,116 @@
 package app;
 
+import model.Pedido;
 import model.PedidoComida;
 import model.PedidoEncomienda;
 import model.PedidoExpress;
 import service.ControladorDeEnvios;
+import service.Repartidor;
+
+import java.sql.SQLOutput;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Main {
 
     public static void main(String[] args) {
 
         System.out.println("============================");
-        System.out.println("==== SISTEMA SPEEDFAST ====");
+        System.out.println("======== SPEEDFAST =========");
+        System.out.println("== SIMULACIÓN DE ENTREGAS ==");
         System.out.println("============================");
 
-        PedidoComida comida = new PedidoComida(
+        // Crear pedidos
+
+        Pedido comida1 = new PedidoComida(
                 1,
                 "Av. Los Carrera 123",
                 5,
                 true
         );
 
-        PedidoEncomienda encomienda = new PedidoEncomienda(
+        Pedido comida2 = new PedidoComida(
                 2,
                 "Av. Alemania 456",
+                3,
+                true
+        );
+
+        Pedido encomienda1 = new PedidoEncomienda(
+                3,
+                "Av. O'Higgins 789",
                 6,
                 10,
                 true
         );
 
-        PedidoExpress express = new PedidoExpress(
-                3,
-                "Av. O'Higgins 789",
+        Pedido encomienda2 = new PedidoEncomienda(
+                4,
+                "Calle Prat 321",
+                4,
                 8,
                 true
         );
 
-        // Mostrar Informacion
-        System.out.println("\n--- PEDIDOS ---");
+        Pedido express1 = new PedidoExpress(
+                5,
+                "Av. Pedro Montt 111",
+                8,
+                true
+        );
 
-        comida.mostrarResumen();
-        System.out.println("Tiempo: " + comida.calcularTiempoEntrega() + " minutos");
+        Pedido express2 = new PedidoExpress(
+                6,
+                "Calle Independencia 222",
+                3,
+                true
+        );
 
-        System.out.println();
+        // Crear Repartidores
 
-        encomienda.mostrarResumen();
-        System.out.println("Tiempo: " + encomienda.calcularTiempoEntrega() + " minutos");
+        Repartidor repartidor1 = new Repartidor("Carlos");
+        Repartidor repartidor2 = new Repartidor("Pedro");
+        Repartidor repartidor3 = new Repartidor("Juan");
 
-        System.out.println();
+        // Asignar Pedidos
 
-        express.mostrarResumen();
-        System.out.println("Tiempo: " + express.calcularTiempoEntrega() + " minutos");
+        repartidor1.agregarPedido(comida1);
+        repartidor2.agregarPedido(encomienda1);
 
-        // Asignación automática
-        System.out.println("\n--- ASIGNACIÓN AUTOMÁTICA ---");
+        repartidor2.agregarPedido(comida2);
+        repartidor2.agregarPedido(express1);
 
-        comida.asignarRepartidor();
-        encomienda.asignarRepartidor();
-        express.asignarRepartidor();
+        repartidor3.agregarPedido(encomienda2);
+        repartidor3.agregarPedido(express2);
 
-        // Asignación manual
-        System.out.println("\n--- ASIGNACIÓN MANUAL");
+        // Crear Ejecutor
 
-        comida.asignarRepartidor("Carlos");
-        encomienda.asignarRepartidor("Pedro");
-        express.asignarRepartidor("Juan");
+        ExecutorService executor = Executors.newFixedThreadPool(3);
 
-        // Crear controlador
-        ControladorDeEnvios controlador = new ControladorDeEnvios();
+        System.out.println("\nIniciando repartidores...\n");
 
-        controlador.agregarPedido(comida);
-        controlador.agregarPedido(encomienda);
-        controlador.agregarPedido(express);
+        // Ejecutar los tres repartidores
+        executor.submit(repartidor1);
+        executor.submit(repartidor2);
+        executor.submit(repartidor3);
 
-        // Despachar
-        System.out.println("\n--- DESPACHO ---");
+        // No aceptar nuevas tareas
+        executor.shutdown();
 
-        controlador.despachar();
+        // Esperar a que terminen
+        while (!executor.isTerminated()) {
 
-        // Cancelar
-        System.out.println("\n--- CANCELACIÓN ---");
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                break;
+            }
+        }
 
-        controlador.cancelar();
+        System.out.println("=================================");
+        System.out.println("TODOS LOS REPARTIDORES TERMINARON");
+        System.out.println("=================================");
 
-        // Historial
-        controlador.verHistorial();
     }
 }

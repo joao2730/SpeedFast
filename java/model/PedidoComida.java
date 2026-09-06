@@ -16,7 +16,7 @@ public class PedidoComida extends Pedido {
         if (mochilaTermica) {
             System.out.println("Pedido de comida #" + getIdPedido());
             System.out.println("Repartidor asignado.");
-            System.out.println("El repartido tiene mochila térmica.");
+            System.out.println("El repartidor tiene mochila térmica.");
         } else  {
             System.out.println("No se puede asignar el repartidor.");
             System.out.println("Se necesita mochila térmica");
@@ -34,7 +34,7 @@ public class PedidoComida extends Pedido {
             System.out.println("Tiene mochila térmica.");
         } else   {
             System.out.println("No se puede asignar a " + nombre);
-            System.out.println("No tiene ochila térmica.");
+            System.out.println("No tiene mochila térmica.");
         }
     }
 

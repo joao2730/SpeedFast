@@ -1,15 +1,15 @@
 package model;
 
-public abstract class Pedido {
+public class Pedido {
 
     private int idPedido;
     private String direccionEntrega;
-    private double distanciaKm;
+    private EstadoPedido estado;
 
-    public Pedido(int idPedido, String direccionEntrega, double distanciaKm) {
+    public Pedido(int idPedido, String direccionEntrega, EstadoPedido estado) {
         this.idPedido = idPedido;
         this.direccionEntrega = direccionEntrega;
-        this.distanciaKm = distanciaKm;
+        this.estado = estado;
     }
 
     public int getIdPedido() {
@@ -28,29 +28,16 @@ public abstract class Pedido {
         this.direccionEntrega = direccionEntrega;
     }
 
-    public double getDistanciaKm() {
-        return distanciaKm;
+    public EstadoPedido getEstado() {
+        return estado;
     }
 
-    public void setDistanciaKm(double distanciaKm) {
-        this.distanciaKm = distanciaKm;
+    public void setEstado(EstadoPedido nuevoEstado) {
+        this.estado = nuevoEstado;
     }
 
-    //Método implementado
-    public void mostrarResumen(){
-        System.out.println("ID del pedido: #" + idPedido);
-        System.out.println("Dirección: " + direccionEntrega);
-        System.out.println("Distancia: " + distanciaKm + " km");
-    }
-
-    //Método abstracto
-    public abstract int calcularTiempoEntrega();
-
-    public void asignarRepartidor() {
-        System.out.println("Asignando repartidor automáticamente.");
-    }
-
-    public void asignarRepartidor(String nombre) {
-        System.out.println("Repartidor Asignado: " + nombre);
+    @Override
+    public String toString() {
+        return "Pedido {" + "id = " + idPedido + ", direccion Entrega = " + direccionEntrega + '\'' + "estado = " + estado + '}';
     }
 }

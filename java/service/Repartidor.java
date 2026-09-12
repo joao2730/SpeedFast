@@ -1,5 +1,6 @@
 package service;
 
+import model.EstadoPedido;
 import model.Pedido;
 
 import java.util.ArrayList;
@@ -8,15 +9,11 @@ import java.util.Random;
 public class Repartidor implements Runnable {
 
     private String nombre;
-    private ArrayList<Pedido> pedidos;
+    private ZonaDeCarga zonaDeCarga;
 
-    public Repartidor(String nombre) {
+    public Repartidor(String nombre, ZonaDeCarga zonaDeCarga) {
         this.nombre = nombre;
-        this.pedidos = new ArrayList<>();
-    }
-
-    public void agregarPedido(Pedido pedido) {
-        pedidos.add(pedido);
+        this.zonaDeCarga = zonaDeCarga;
     }
 
     @Override
@@ -24,28 +21,39 @@ public class Repartidor implements Runnable {
 
         Random random = new Random();
 
-        System.out.println("\n" + nombre + " comenzó sus entregas.");
+        while (true) {
 
-        for (Pedido pedido : pedidos) {
+            // Retirar un pedido de la zona de carga
+            Pedido pedido = zonaDeCarga.retirarPedido();
 
-            System.out.println("\n" + nombre + " está entregando el pedido #" + pedido.getIdPedido() + " | Direccion: " + pedido.getDireccionEntrega());
+            // Si no quedan pedidos, termina el repartidor
+            if (pedido == null) {
+                break;
+            }
+
+            System.out.println(nombre + " retiro el pedido #" + pedido.getIdPedido() + " - Estado: " + pedido.getEstado());
+
+            System.out.println(nombre + " esta entregando el pedido #" + pedido.getIdPedido() + " en: " + pedido.getDireccionEntrega());
 
             try {
-
-                // Tiempo aleatorio entre 1 y 3 segundos
+                // Simula el tiempo de entrega
+                // entre 1 y 3 segundos
                 int tiempo = random.nextInt(3000) + 1000;
 
                 Thread.sleep(tiempo);
 
             } catch (InterruptedException e) {
-
                 System.out.println(nombre + " fue interrumpido.");
 
                 Thread.currentThread().interrupt();
+
                 return;
             }
 
-            System.out.println("\n" + nombre + " terminó la entrega del pedido #" + pedido.getIdPedido());
+            // Marcar pedido como entregado
+            pedido.setEstado(EstadoPedido.ENTREGADO);
+
+            System.out.println(nombre + " entrego correctamente el pedido #" + pedido.getIdPedido() + " - Estado: " + pedido.getEstado());
         }
 
         System.out.println(nombre + " terminó todas sus entregas.");

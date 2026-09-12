@@ -1,13 +1,10 @@
 package app;
 
+import model.EstadoPedido;
 import model.Pedido;
-import model.PedidoComida;
-import model.PedidoEncomienda;
-import model.PedidoExpress;
-import service.ControladorDeEnvios;
 import service.Repartidor;
+import service.ZonaDeCarga;
 
-import java.sql.SQLOutput;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -15,81 +12,65 @@ public class Main {
 
     public static void main(String[] args) {
 
-        System.out.println("============================");
-        System.out.println("======== SPEEDFAST =========");
-        System.out.println("== SIMULACIÓN DE ENTREGAS ==");
-        System.out.println("============================");
+        System.out.println("===========================");
+        System.out.println("     SISTEMA SPEEDFAST     ");
+        System.out.println(" ZONA DE CARGA CONCURRENTE ");
+        System.out.println("===========================");
+
+        // Crear zona de carga compartida
+        ZonaDeCarga zonaDeCarga = new ZonaDeCarga();
 
         // Crear pedidos
-
-        Pedido comida1 = new PedidoComida(
+        Pedido pedido1 = new Pedido(
                 1,
-                "Av. Los Carrera 123",
-                5,
-                true
+                "Av. Alemania 123",
+                EstadoPedido.PENDIENTE
         );
 
-        Pedido comida2 = new PedidoComida(
+        Pedido pedido2 = new Pedido(
                 2,
-                "Av. Alemania 456",
-                3,
-                true
+                "Av. Los Carrera 456",
+                EstadoPedido.PENDIENTE
         );
 
-        Pedido encomienda1 = new PedidoEncomienda(
+        Pedido pedido3 = new Pedido(
                 3,
                 "Av. O'Higgins 789",
-                6,
-                10,
-                true
+                EstadoPedido.PENDIENTE
         );
 
-        Pedido encomienda2 = new PedidoEncomienda(
+        Pedido pedido4 = new Pedido(
                 4,
                 "Calle Prat 321",
-                4,
-                8,
-                true
+                EstadoPedido.PENDIENTE
         );
 
-        Pedido express1 = new PedidoExpress(
+        Pedido pedido5 = new Pedido(
                 5,
-                "Av. Pedro Montt 111",
-                8,
-                true
+                "Av. Pedro Montt 654",
+                EstadoPedido.PENDIENTE
         );
 
-        Pedido express2 = new PedidoExpress(
-                6,
-                "Calle Independencia 222",
-                3,
-                true
-        );
+        // Agregar pedidos a la zona de carga
+        zonaDeCarga.agregarPedido(pedido1);
+        zonaDeCarga.agregarPedido(pedido2);
+        zonaDeCarga.agregarPedido(pedido3);
+        zonaDeCarga.agregarPedido(pedido4);
+        zonaDeCarga.agregarPedido(pedido5);
 
-        // Crear Repartidores
+        // Crear repartidores
+        Repartidor repartidor1 = new Repartidor("Camila" , zonaDeCarga);
 
-        Repartidor repartidor1 = new Repartidor("Carlos");
-        Repartidor repartidor2 = new Repartidor("Pedro");
-        Repartidor repartidor3 = new Repartidor("Juan");
+        Repartidor repartidor2 = new Repartidor("Luis" , zonaDeCarga);
 
-        // Asignar Pedidos
+        Repartidor repartidor3 = new Repartidor("Pedro" , zonaDeCarga);
 
-        repartidor1.agregarPedido(comida1);
-        repartidor2.agregarPedido(encomienda1);
-
-        repartidor2.agregarPedido(comida2);
-        repartidor2.agregarPedido(express1);
-
-        repartidor3.agregarPedido(encomienda2);
-        repartidor3.agregarPedido(express2);
-
-        // Crear Ejecutor
-
+        // Crear grupos de 3 hilos
         ExecutorService executor = Executors.newFixedThreadPool(3);
 
-        System.out.println("\nIniciando repartidores...\n");
+        System.out.println("\n--- INICIANDO ENTREGAS ---\n");
 
-        // Ejecutar los tres repartidores
+        // Ejecutar repartidores
         executor.submit(repartidor1);
         executor.submit(repartidor2);
         executor.submit(repartidor3);
@@ -97,20 +78,22 @@ public class Main {
         // No aceptar nuevas tareas
         executor.shutdown();
 
-        // Esperar a que terminen
+        // Esperar a que todos terminen
         while (!executor.isTerminated()) {
 
             try {
                 Thread.sleep(500);
             } catch (InterruptedException e) {
+
                 Thread.currentThread().interrupt();
+
                 break;
             }
         }
 
-        System.out.println("=================================");
-        System.out.println("TODOS LOS REPARTIDORES TERMINARON");
-        System.out.println("=================================");
-
+        System.out.println("\n===================================================");
+        System.out.println("Todos los pedidos han sido entregador correctamente");
+        System.out.println("===================================================");
     }
+
 }

@@ -14,8 +14,6 @@ public class ZonaDeCarga {
 
     public void agregarPedido(Pedido p) {
         pedidos.offer(p);
-
-        System.out.println("Pedido #" + p.getIdPedido() + " agregado a la zona de carga");
     }
 
     public Pedido retirarPedido() {
@@ -27,5 +25,9 @@ public class ZonaDeCarga {
         }
 
         return pedido;
+    }
+
+    public boolean estaVacia() {
+        return pedidos.isEmpty();
     }
 }

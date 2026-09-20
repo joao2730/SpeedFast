@@ -16,10 +16,12 @@ public class Repartidor implements Runnable {
         this.zonaDeCarga = zonaDeCarga;
     }
 
+    public String getNombre() {
+        return nombre;
+    }
+
     @Override
     public void run() {
-
-        Random random = new Random();
 
         while (true) {
 
@@ -31,19 +33,21 @@ public class Repartidor implements Runnable {
                 break;
             }
 
-            System.out.println(nombre + " retiro el pedido #" + pedido.getIdPedido() + " - Estado: " + pedido.getEstado());
+            // Asignamos el repartidor al pedido
+            pedido.asignarRepartidor(nombre);
 
-            System.out.println(nombre + " esta entregando el pedido #" + pedido.getIdPedido() + " en: " + pedido.getDireccionEntrega());
+            System.out.println(nombre + " esta entregando el pedido #" + pedido.getIdPedido());
 
             try {
+
+                Random random = new Random();
+
                 // Simula el tiempo de entrega
-                // entre 1 y 3 segundos
-                int tiempo = random.nextInt(3000) + 1000;
+                int tiempo = 1000 + random.nextInt(2000);
 
                 Thread.sleep(tiempo);
 
             } catch (InterruptedException e) {
-                System.out.println(nombre + " fue interrumpido.");
 
                 Thread.currentThread().interrupt();
 
@@ -53,10 +57,7 @@ public class Repartidor implements Runnable {
             // Marcar pedido como entregado
             pedido.setEstado(EstadoPedido.ENTREGADO);
 
-            System.out.println(nombre + " entrego correctamente el pedido #" + pedido.getIdPedido() + " - Estado: " + pedido.getEstado());
+            System.out.println(nombre + " entrego el pedido #" + pedido.getIdPedido());
         }
-
-        System.out.println(nombre + " terminó todas sus entregas.");
-
     }
 }

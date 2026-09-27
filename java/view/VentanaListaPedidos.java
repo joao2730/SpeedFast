@@ -1,66 +1,143 @@
 package view;
 
 import controller.ControladorPedidos;
+import dao.PedidoDAO;
 import model.Pedido;
 
 import javax.swing.*;
+import javax.swing.plaf.BorderUIResource;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.util.List;
 
 public class VentanaListaPedidos extends JFrame {
-
-    private ControladorPedidos controlador;
 
     private JTable tabla;
 
     private DefaultTableModel modelo;
 
-    public VentanaListaPedidos(ControladorPedidos controlador) {
+    private JButton btnActualizar;
+    private JButton btnCerrar;
 
-        this.controlador = controlador;
+    private PedidoDAO pedidoDAO;
 
-        setTitle("Lista de pedidos");
-        setSize(800, 400);
+    public VentanaListaPedidos() {
+
+        pedidoDAO = new PedidoDAO();
+
+        configurarVentana();
+        crearComponentes();
+        cargarPedidos();
+
+    }
+
+    /**
+     * Configura la ventana.
+     */
+    private void configurarVentana() {
+
+        setTitle("Lista de Pedidos - SpeedFast");
+
+        setSize(800, 450);
+
         setLocationRelativeTo(null);
 
-        crearInterfaz();
-        cargarPedidos();
-    }
-    private void crearInterfaz() {
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
         setLayout(new BorderLayout());
+    }
 
-        String[] columnas = {"ID", "Direccion", "Tipo", "Distancia", "Tiempo", "Estado", "Repartidor"};
+    /**
+     * Crea la tabla y los botones.
+     */
+    private void crearComponentes() {
 
-        modelo = new DefaultTableModel(columnas, 0);
+        /**
+         * Columnas de la tabla.
+         */
+        String[] columnas = {
+                "ID",
+                "Direccion",
+                "Tipo",
+                "Distancia (km)",
+                "Tiempo (min)",
+                "Estado",
+        };
 
+        /**
+         * Modelo de la tabla.
+         */
+        modelo = new DefaultTableModel(columnas, 0) {
+
+            @Override
+            public boolean isCellEditable(int fila, int column) {
+
+                return false;
+            }
+        };
+
+        /**
+         * Crear tabla.
+         */
         tabla = new JTable(modelo);
 
-        JScrollPane scroll = new JScrollPane(tabla);
+        /**
+         * Permitir desplazamiento.
+         */
+        JScrollPane scrollPane = new JScrollPane(tabla);
 
-        add(scroll, BorderLayout.CENTER);
+        add(scrollPane, BorderLayout.CENTER);
 
-        JButton btnActualizar = new JButton("Actualizar");
+        /**
+         * Panel inferior.
+         */
+        JPanel panelBotones = new JPanel();
 
+        btnActualizar = new JButton("Actualizar");
+        btnCerrar = new JButton("Cerrar");
+
+        panelBotones.add(btnActualizar);
+        panelBotones.add(btnCerrar);
+
+        add(panelBotones, BorderLayout.SOUTH);
+
+        /**
+         * Eventos
+         */
         btnActualizar.addActionListener(e -> cargarPedidos());
-
-        add(btnActualizar, BorderLayout.SOUTH);
+        btnCerrar.addActionListener(e -> dispose());
     }
+
+    /**
+     * Obtiene los pedidos desde MySQL
+     * y los muestra en la tabla.
+     */
     private void cargarPedidos() {
 
+        /**
+         * Limpiar la tabla antes de cargar
+         * nuevamente los datos.
+         */
         modelo.setRowCount(0);
 
-        for (Pedido pedido : controlador.getPedidos()) {
+        /**
+         * Obtener pedidos de MySQL.
+         */
+        List<Pedido> pedidos = pedidoDAO.listarTodos();
+
+        /**
+         * Recorrer los pedidos.
+         */
+        for (Pedido pedido : pedidos) {
 
             Object[] fila = {
 
                     pedido.getIdPedido(),
                     pedido.getDireccionEntrega(),
                     pedido.getTipo(),
-                    pedido.getDistanciaKm() + " km",
-                    pedido.calcularTiempoEntrega() + " min",
+                    pedido.getDistanciaKm(),
+                    pedido.calcularTiempoEntrega(),
                     pedido.getEstado(),
-                    pedido.getRepartidor()
             };
 
             modelo.addRow(fila);

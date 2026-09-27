@@ -1,13 +1,16 @@
 package view;
 
 import controller.ControladorPedidos;
+import dao.PedidoDAO;
+import dao.RepartidorDAO;
 import model.EstadoPedido;
 import model.Pedido;
-import service.Repartidor;
+import model.Repartidor;
 import service.ZonaDeCarga;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -15,117 +18,195 @@ public class VentanaPrincipal extends JFrame {
 
     private ControladorPedidos controlador;
 
-    private JButton btnRegistrar;
-    private JButton btnListar;
-    private JButton btnIniciar;
+    private JButton btnRegistrarPedido;
+    private JButton btnListarPedidos;
+    private JButton btnIniciarEntrega;
+    private JButton btnRegistrarRepartidor;
+
+    private PedidoDAO pedidoDAO;
+    private RepartidorDAO repartidorDAO;
 
     public VentanaPrincipal() {
 
-        controlador = new ControladorPedidos();
+        pedidoDAO = new PedidoDAO();
+        repartidorDAO = new RepartidorDAO();
 
-        setTitle("SpeedFast - Sistema de Entregas");
-        setSize(500, 350);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);
-
-        crearInterfaz();
+        configurarVentana();
+        crearComponentes();
     }
 
-    private void crearInterfaz() {
+    private void configurarVentana() {
+
+        setTitle("SpeedFast - Sistema de Entregas");
+
+        setSize(500, 350);
+
+        setLocationRelativeTo(null);
+
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         setLayout(new BorderLayout());
+    }
 
-        JLabel titulo = new JLabel("SISTEMA SPEEDFAST", SwingConstants.CENTER);
+    private void crearComponentes() {
 
-        titulo.setFont(new Font("Arial", Font.BOLD, 24));
+        JLabel titulo = new JLabel("SPEEDFAST", SwingConstants.CENTER);
+
+        titulo.setFont(new Font("Arial", Font.BOLD, 28));
 
         add(titulo, BorderLayout.NORTH);
 
-        JPanel panelBotones = new JPanel();
+        JPanel panelBotones = new JPanel(new GridLayout(4, 1, 10, 10));
 
-        panelBotones.setLayout(new GridLayout(3,1,10,10));
+        btnRegistrarPedido = new JButton("Registrar pedido");
 
-        btnRegistrar = new JButton("Registrar pedido");
+        btnListarPedidos = new JButton("Listar pedidos");
 
-        btnListar = new JButton("Listar pedidos");
+        btnRegistrarRepartidor = new JButton("Registrar repartidor");
 
-        btnIniciar = new JButton("Asignar repartidor / Iniciar entrega" );
+        btnIniciarEntrega = new JButton("Asignar repartidor / Iniciar entrega");
 
-        panelBotones.add(btnRegistrar);
-        panelBotones.add(btnListar);
-        panelBotones.add(btnIniciar);
+        panelBotones.add(btnRegistrarPedido);
+        panelBotones.add(btnListarPedidos);
+        panelBotones.add(btnRegistrarRepartidor);
+        panelBotones.add(btnIniciarEntrega);
 
         add(panelBotones, BorderLayout.CENTER);
 
-        btnRegistrar.addActionListener(e -> {
+        /**
+         * Eventos.
+         */
 
-            VentanaRegistroPedidos ventana = new VentanaRegistroPedidos(controlador);
-
-            ventana.setVisible(true);
-        });
-
-        btnListar.addActionListener(e -> {
-
-            VentanaListaPedidos ventana = new VentanaListaPedidos(controlador);
-
-            ventana.setVisible(true);
-        });
-
-        btnIniciar.addActionListener(e -> IniciarEntrega());
+        btnRegistrarPedido.addActionListener(e -> registrarPedido());
+        btnListarPedidos.addActionListener(e -> listarPedidos());
+        btnRegistrarRepartidor.addActionListener(e -> registrarRepartidor());
+        btnIniciarEntrega.addActionListener(e -> iniciarEntrega());
     }
 
-    private void IniciarEntrega() {
+    private void registrarPedido() {
 
-        boolean hayPedidos = false;
+      VentanaRegistroPedido ventana = new VentanaRegistroPedido();
 
+        ventana.setVisible(true);
+    }
+
+    private void listarPedidos() {
+
+        VentanaListaPedidos ventana = new VentanaListaPedidos();
+
+        ventana.setVisible(true);
+    }
+
+    private void registrarRepartidor() {
+
+        VentanaRegistroRepartidor ventana = new VentanaRegistroRepartidor();
+
+        ventana.setVisible(true);
+    }
+
+    /**
+     * Inicia la entrega utilizando
+     * Runnable y ExecutorService.
+     */
+    private void iniciarEntrega() {
+
+        /**
+         * Obtener pedidos directamente
+         * desde MySQL.
+         */
+        List<Pedido> pedidos = pedidoDAO.listarTodos();
+
+        if (pedidos.isEmpty()) {
+
+            JOptionPane.showMessageDialog(this, "No existen pedidos registrados.");
+
+            return;
+        }
+
+        /**
+         * Obtener repartidores desde MySQL.
+         */
+        List<Repartidor> repartidores = repartidorDAO.listarTodos();
+
+        if (repartidores.isEmpty()) {
+
+            JOptionPane.showMessageDialog(this, "No existen repartidores registrados.");
+
+            return;
+        }
+
+        /**
+         * Crear zona de carga compartida
+         */
         ZonaDeCarga zonaDeCarga = new ZonaDeCarga();
 
-        // Agregar solamente pedidos pendientes
-        for (Pedido pedido : controlador.getPedidos()) {
+        /**
+         * Agregar solamente pedidos
+         * que esten pendientes
+         */
+        int cantidad = 0;
+
+        for (Pedido pedido : pedidos) {
 
             if (pedido.getEstado() == EstadoPedido.PENDIENTE) {
 
                 zonaDeCarga.agregarPedido(pedido);
 
-                hayPedidos = true;
+                cantidad++;
             }
         }
 
-        if (!hayPedidos) {
+        if (cantidad == 0) {
 
-            JOptionPane.showMessageDialog(this, "No existen pedidos pendientes.", "SpeedFast", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this, "No existen pedidos pendientes.");
 
             return;
         }
 
-        // Ejecutamos la entrega en segundo plano
+        /**
+         * Ejecutar repartidores.
+         */
+        ejecutarRepartidores(zonaDeCarga, repartidores);
+    }
+
+    private void ejecutarRepartidores(
+            ZonaDeCarga zonaDeCarga,
+            List<Repartidor> repartidores) {
+
         SwingWorker<Void, Void> worker = new SwingWorker<>() {
 
             @Override
             protected Void doInBackground() {
 
-                ExecutorService executor = Executors.newFixedThreadPool(3);
+                ExecutorService executor = Executors.newFixedThreadPool(repartidores.size());
 
-                Repartidor repartidor1 = new Repartidor("Juan", zonaDeCarga);
+                /**
+                 * Cada repartidor
+                 * utiliza Runnable.
+                 */
+                for (Repartidor repartidor : repartidores) {
 
-                Repartidor repartidor2 = new Repartidor("Pedro", zonaDeCarga);
+                    repartidor.setZonaDeCarga(zonaDeCarga);
 
-                Repartidor repartidor3 = new Repartidor("Carlos", zonaDeCarga);
-
-                executor.submit(repartidor1);
-                executor.submit(repartidor2);
-                executor.submit(repartidor3);
+                    executor.submit(repartidor);
+                }
 
                 executor.shutdown();
 
-                while(!executor.isTerminated()) {
+                /**
+                 * Esperar hasta que
+                 * terminen los repartidores
+                 */
+                while (!executor.isTerminated()) {
 
                     try {
-                        Thread.sleep(200);
+
+                        Thread.sleep(500);
 
                     } catch (InterruptedException e) {
 
                         Thread.currentThread().interrupt();
+
                         break;
                     }
                 }
@@ -136,12 +217,17 @@ public class VentanaPrincipal extends JFrame {
             @Override
             protected void done() {
 
-                JOptionPane.showMessageDialog(
-                        VentanaPrincipal.this,
-                        "Todos los pedidos pendientes fueron procesados.",
-                        "SpeedFast",
-                        JOptionPane.INFORMATION_MESSAGE
-                );
+                /**
+                 * Actualizar los estados
+                 */
+                List<Pedido> pedidosActualizados = pedidoDAO.listarTodos();
+
+                for (Pedido pedido : pedidosActualizados) {
+
+                    pedidoDAO.actualizarEstado(pedido);
+                }
+
+                JOptionPane.showMessageDialog(VentanaPrincipal.this, "Todas las entregas finalizaron.");
             }
         };
 

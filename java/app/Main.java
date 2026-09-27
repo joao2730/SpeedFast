@@ -1,14 +1,10 @@
 package app;
 
-import model.EstadoPedido;
-import model.Pedido;
-import service.Repartidor;
-import service.ZonaDeCarga;
+import dao.ConexionDB;
 import view.VentanaPrincipal;
 
 import javax.swing.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.sql.Connection;
 
 public class Main {
 
@@ -17,7 +13,7 @@ public class Main {
         SwingUtilities.invokeLater(() -> {
 
             VentanaPrincipal ventana = new VentanaPrincipal();
-            
+
             ventana.setVisible(true);
         });
     }

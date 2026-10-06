@@ -8,7 +8,7 @@ import model.Pedido;
 
 import java.util.ArrayList;
 
-public class ControladorPedidos implements Despachable, Cancelable, Rastreable {
+public class ControladorPedidos implements Despachable, Rastreable {
 
     private ArrayList<Pedido> pedidos;
 
@@ -37,16 +37,6 @@ public class ControladorPedidos implements Despachable, Cancelable, Rastreable {
         }
 
         return false;
-    }
-
-    @Override
-    public void cancelar(Pedido pedido) {
-
-        if (pedido.getEstado() != EstadoPedido.ENTREGADO) {
-
-            pedido.setEstado(EstadoPedido.CANCELADO);
-        }
-
     }
 
     @Override

@@ -1,6 +1,7 @@
 package model;
 
 import service.ZonaDeCarga;
+import dao.PedidoDAO;
 
 import java.util.Random;
 
@@ -69,7 +70,9 @@ public class Repartidor implements Runnable {
             return;
         }
 
-        while (true) {
+        Random random = new Random();
+
+        while (!Thread.currentThread().isInterrupted()) {
 
             Pedido pedido = zonaDeCarga.retirarPedido();
 
@@ -78,14 +81,11 @@ public class Repartidor implements Runnable {
                 break;
             }
 
-            // Asignamos este repartidor al pedido
-            pedido.asignarRepartidor(nombre);
+            pedido.setNombreRepartidor(nombre);
 
             System.out.println(nombre + " esta entregando el pedido " + pedido.getIdPedido());
 
             try {
-
-                Random random = new Random();
 
                 int tiempo = 1000 + random.nextInt(2000);
 
@@ -95,12 +95,14 @@ public class Repartidor implements Runnable {
 
                 Thread.currentThread().interrupt();
 
-                System.out.println(nombre + " fue interrumpido.");
-
                 break;
             }
 
             pedido.setEstado(EstadoPedido.ENTREGADO);
+
+            PedidoDAO pedidoDAO = new PedidoDAO();
+
+            pedidoDAO.actualizarEstado(pedido.getIdPedido(), EstadoPedido.ENTREGADO);
 
             System.out.println(nombre + " entrego el pedido " + pedido.getIdPedido());
         }

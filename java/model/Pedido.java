@@ -4,16 +4,14 @@ public abstract class Pedido {
 
     private int idPedido;
     private String direccionEntrega;
-    private double distanciaKm;
     private EstadoPedido estado;
-    private String repartidor;
+    private String nombreRepartidor;
 
-    public Pedido(int idPedido, String direccionEntrega, double distanciaKm) {
+    public Pedido(int idPedido, String direccionEntrega) {
         this.idPedido = idPedido;
         this.direccionEntrega = direccionEntrega;
-        this.distanciaKm = distanciaKm;
         this.estado = EstadoPedido.PENDIENTE;
-        this.repartidor = "Sin asignar";
+        this.nombreRepartidor = "Sin asignar";
     }
 
     public int getIdPedido() {
@@ -28,24 +26,16 @@ public abstract class Pedido {
         return direccionEntrega;
     }
 
-    public double getDistanciaKm() {
-        return distanciaKm;
-    }
-
-    public void setDistanciaKm(double distanciaKm) {
-        this.distanciaKm = distanciaKm;
-    }
-
-    public String getRepartidor() {
-        return repartidor;
-    }
-
-    public void setRepartidor(String repatidor) {
-        this.repartidor = repatidor;
-    }
-
     public void setDireccionEntrega(String direccionEntrega) {
         this.direccionEntrega = direccionEntrega;
+    }
+
+    public String getNombreRepartidor() {
+        return nombreRepartidor;
+    }
+
+    public void setNombreRepartidor(String nombreRepartidor) {
+        this.nombreRepartidor = nombreRepartidor;
     }
 
     public EstadoPedido getEstado() {
@@ -56,35 +46,17 @@ public abstract class Pedido {
         this.estado = estado;
     }
 
-    // Metodo que puede ser sobrescrito
-    public void asignarRepartidor() {
-        this.repartidor = "Repartidor disponible";
-    }
-
-    // Sobrecarga del metodo anterior
-    public void asignarRepartidor(String nombreRepartidor) {
-        this.repartidor = nombreRepartidor;
-    }
+    public abstract String getTipo();
 
     public void mostrarResumen() {
-        System.out.println("ID: " + idPedido);
+        System.out.println("Pedido: " + idPedido);
         System.out.println("Direccion: " + direccionEntrega);
-        System.out.println("Distancia: " + distanciaKm + " km");
+        System.out.println("Tipo: " + getTipo());
         System.out.println("Estado: " + estado);
-        System.out.println("Repartidor: " + repartidor);
     }
-
-    public abstract int calcularTiempoEntrega();
-
-    public abstract String getTipo();
 
     @Override
     public String toString() {
-        return "Pedido " + idPedido +
-                " - " + getTipo() +
-                " - " + direccionEntrega +
-                " - " + estado;
+        return idPedido + " - " + direccionEntrega;
     }
-
-
 }

@@ -14,12 +14,12 @@ public class ConexionDB {
 
     public static Connection conectar() {
 
-        Connection conexion = null;
-
         try {
-            conexion = DriverManager.getConnection(URL, USER, PASSWORD);
+            Connection conexion = DriverManager.getConnection(URL, USER, PASSWORD);
 
             System.out.println("Conexion exitosa a MySQL.");
+
+            return conexion;
 
         } catch (SQLException e){
 
@@ -27,6 +27,6 @@ public class ConexionDB {
 
         }
 
-        return conexion;
+        return null;
     }
 }

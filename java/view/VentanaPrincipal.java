@@ -16,221 +16,46 @@ import java.util.concurrent.Executors;
 
 public class VentanaPrincipal extends JFrame {
 
-    private ControladorPedidos controlador;
-
-    private JButton btnRegistrarPedido;
-    private JButton btnListarPedidos;
-    private JButton btnIniciarEntrega;
-    private JButton btnRegistrarRepartidor;
-
-    private PedidoDAO pedidoDAO;
-    private RepartidorDAO repartidorDAO;
-
     public VentanaPrincipal() {
 
-        pedidoDAO = new PedidoDAO();
-        repartidorDAO = new RepartidorDAO();
+       setTitle("SpeedFast - Sistema de Gestion");
+       setSize(500, 350);
+       setLocationRelativeTo(null);
+       setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        configurarVentana();
         crearComponentes();
-    }
-
-    private void configurarVentana() {
-
-        setTitle("SpeedFast - Sistema de Entregas");
-
-        setSize(500, 350);
-
-        setLocationRelativeTo(null);
-
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-        setLayout(new BorderLayout());
     }
 
     private void crearComponentes() {
 
-        JLabel titulo = new JLabel("SPEEDFAST", SwingConstants.CENTER);
+        JPanel panel = new JPanel(new GridLayout(7, 1, 10, 10));
 
-        titulo.setFont(new Font("Arial", Font.BOLD, 28));
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
 
-        add(titulo, BorderLayout.NORTH);
+        JButton btnRegistrarRepartidor = new JButton("Registrar repartidor");
+        JButton btnListarRepartidores = new JButton("Administrar Repartidores");
+        JButton btnRegistrarPedido = new JButton("Registrar pedido");
+        JButton btnListarPedidos = new JButton("Administrar pedidos");
+        JButton btnRegistrarEntrega = new JButton("Registrar entrega");
+        JButton btnListarEntregas = new JButton("Administrar entregas");
+        JButton btnSalir = new JButton("Salir");
 
-        JPanel panelBotones = new JPanel(new GridLayout(4, 1, 10, 10));
+        panel.add(btnRegistrarRepartidor);
+        panel.add(btnListarRepartidores);
+        panel.add(btnRegistrarPedido);
+        panel.add(btnListarPedidos);
+        panel.add(btnRegistrarEntrega);
+        panel.add(btnListarEntregas);
+        panel.add(btnSalir);
 
-        btnRegistrarPedido = new JButton("Registrar pedido");
+        add(panel, BorderLayout.CENTER);
 
-        btnListarPedidos = new JButton("Listar pedidos");
-
-        btnRegistrarRepartidor = new JButton("Registrar repartidor");
-
-        btnIniciarEntrega = new JButton("Asignar repartidor / Iniciar entrega");
-
-        panelBotones.add(btnRegistrarPedido);
-        panelBotones.add(btnListarPedidos);
-        panelBotones.add(btnRegistrarRepartidor);
-        panelBotones.add(btnIniciarEntrega);
-
-        add(panelBotones, BorderLayout.CENTER);
-
-        /**
-         * Eventos.
-         */
-
-        btnRegistrarPedido.addActionListener(e -> registrarPedido());
-        btnListarPedidos.addActionListener(e -> listarPedidos());
-        btnRegistrarRepartidor.addActionListener(e -> registrarRepartidor());
-        btnIniciarEntrega.addActionListener(e -> iniciarEntrega());
-    }
-
-    private void registrarPedido() {
-
-      VentanaRegistroPedido ventana = new VentanaRegistroPedido();
-
-        ventana.setVisible(true);
-    }
-
-    private void listarPedidos() {
-
-        VentanaListaPedidos ventana = new VentanaListaPedidos();
-
-        ventana.setVisible(true);
-    }
-
-    private void registrarRepartidor() {
-
-        VentanaRegistroRepartidor ventana = new VentanaRegistroRepartidor();
-
-        ventana.setVisible(true);
-    }
-
-    /**
-     * Inicia la entrega utilizando
-     * Runnable y ExecutorService.
-     */
-    private void iniciarEntrega() {
-
-        /**
-         * Obtener pedidos directamente
-         * desde MySQL.
-         */
-        List<Pedido> pedidos = pedidoDAO.listarTodos();
-
-        if (pedidos.isEmpty()) {
-
-            JOptionPane.showMessageDialog(this, "No existen pedidos registrados.");
-
-            return;
-        }
-
-        /**
-         * Obtener repartidores desde MySQL.
-         */
-        List<Repartidor> repartidores = repartidorDAO.listarTodos();
-
-        if (repartidores.isEmpty()) {
-
-            JOptionPane.showMessageDialog(this, "No existen repartidores registrados.");
-
-            return;
-        }
-
-        /**
-         * Crear zona de carga compartida
-         */
-        ZonaDeCarga zonaDeCarga = new ZonaDeCarga();
-
-        /**
-         * Agregar solamente pedidos
-         * que esten pendientes
-         */
-        int cantidad = 0;
-
-        for (Pedido pedido : pedidos) {
-
-            if (pedido.getEstado() == EstadoPedido.PENDIENTE) {
-
-                zonaDeCarga.agregarPedido(pedido);
-
-                cantidad++;
-            }
-        }
-
-        if (cantidad == 0) {
-
-            JOptionPane.showMessageDialog(this, "No existen pedidos pendientes.");
-
-            return;
-        }
-
-        /**
-         * Ejecutar repartidores.
-         */
-        ejecutarRepartidores(zonaDeCarga, repartidores);
-    }
-
-    private void ejecutarRepartidores(
-            ZonaDeCarga zonaDeCarga,
-            List<Repartidor> repartidores) {
-
-        SwingWorker<Void, Void> worker = new SwingWorker<>() {
-
-            @Override
-            protected Void doInBackground() {
-
-                ExecutorService executor = Executors.newFixedThreadPool(repartidores.size());
-
-                /**
-                 * Cada repartidor
-                 * utiliza Runnable.
-                 */
-                for (Repartidor repartidor : repartidores) {
-
-                    repartidor.setZonaDeCarga(zonaDeCarga);
-
-                    executor.submit(repartidor);
-                }
-
-                executor.shutdown();
-
-                /**
-                 * Esperar hasta que
-                 * terminen los repartidores
-                 */
-                while (!executor.isTerminated()) {
-
-                    try {
-
-                        Thread.sleep(500);
-
-                    } catch (InterruptedException e) {
-
-                        Thread.currentThread().interrupt();
-
-                        break;
-                    }
-                }
-
-                return null;
-            }
-
-            @Override
-            protected void done() {
-
-                /**
-                 * Actualizar los estados
-                 */
-                List<Pedido> pedidosActualizados = pedidoDAO.listarTodos();
-
-                for (Pedido pedido : pedidosActualizados) {
-
-                    pedidoDAO.actualizarEstado(pedido);
-                }
-
-                JOptionPane.showMessageDialog(VentanaPrincipal.this, "Todas las entregas finalizaron.");
-            }
-        };
-
-        worker.execute();
+        btnRegistrarRepartidor.addActionListener(e -> new VentanaRegistroRepartidor().setVisible(true));
+        btnListarRepartidores.addActionListener(e -> new VentanaListaRepartidores().setVisible(true));
+        btnRegistrarPedido.addActionListener(e -> new VentanaRegistroPedido().setVisible(true));
+        btnListarPedidos.addActionListener(e -> new  VentanaListaPedidos().setVisible(true));
+        btnRegistrarEntrega.addActionListener(e -> new VentanaRegistroEntrega().setVisible(true));
+        btnListarEntregas.addActionListener(e -> new VentanaListaEntregas().setVisible(true));
+        btnSalir.addActionListener(e -> System.exit(0));
     }
 }
